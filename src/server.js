@@ -19,6 +19,19 @@ server.use(cors())
 server.use(express.json())
 server.use(routes)
 
+// handle not found
+server.use((req, res, next) => {
+  const error = new Error('Not found')
+  error.status = 404
+  next(error)
+})
+
+// catch all
+server.use((error, req, res, next) => {
+  res.status(error.status || 500)
+  res.json({ error: error.message })
+})
+
 server.listen(port, () => {
   console.log(`🚀 API is running on http://localhost:${port}`)
 })
