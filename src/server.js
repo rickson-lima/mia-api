@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import morgan from 'morgan'
 
 import routes from './routes'
 
@@ -17,6 +18,8 @@ mongoose.connect(
 
 server.use(cors())
 server.use(express.json())
+server.use(morgan('dev'))
+
 server.use(routes)
 
 // handle not found
