@@ -18,10 +18,10 @@ const ContributorSchema = new Schema({
   telefone: Number,
 
   cep: Number,
-  bairro: Number,
-  rua: Number,
-  logradouro: Number,
-  bairro: Number,
+  bairro: String,
+  rua: String,
+  logradouro: String,
+  bairro: String,
 
   statusDoCadastro: String,
 })
