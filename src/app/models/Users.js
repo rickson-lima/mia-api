@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose'
 
-const UserSchema = new Schema({
+const ContributorSchema = new Schema({
   nome: String,
   cpf: {
     type: Number,
@@ -26,4 +26,4 @@ const UserSchema = new Schema({
   statusDoCadastro: String,
 })
 
-export default model('User', UserSchema)
+export default model('Contributor', ContributorSchema)
