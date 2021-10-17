@@ -2,22 +2,22 @@ import { model, Schema } from 'mongoose'
 
 const ContributorSchema = new Schema(
   {
+    nome: { String, required: true },
     cpf: {
       type: String,
       required: true,
       unique: true,
     },
-    nome: String,
+
     status: String,
+
     email: {
       type: String,
       unique: true,
-      required: true,
     },
-    telefone: {
-      type: String,
-      required: true,
-    },
+
+    telefone: String,
+
     cep: String,
     estado: String,
     cidade: String,
