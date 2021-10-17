@@ -3,7 +3,7 @@ import { model, Schema } from 'mongoose'
 const ContributorSchema = new Schema(
   {
     cpf: {
-      type: Number,
+      type: String,
       required: true,
       unique: true,
     },
@@ -13,17 +13,17 @@ const ContributorSchema = new Schema(
       required: true,
     },
     telefone: {
-      type: Number,
+      type: String,
       required: true,
     },
     nome: String,
 
-    cep: Number,
+    cep: String,
     estado: String,
     cidade: String,
     bairro: String,
-    rua: String,
-    numeroDaCasa: Number,
+    logradouro: String,
+    numero: String,
 
     statusDoCadastro: String,
   },

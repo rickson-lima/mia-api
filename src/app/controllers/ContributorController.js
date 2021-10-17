@@ -6,7 +6,7 @@ class ContributorController {
 
   async store(req, res, next) {
     try {
-      const { cpf, email, telefone, nome, cep, numeroDaCasa } = req.body
+      const { cpf, email, telefone, nome, cep, numero } = req.body
 
       const isContributorRegistered = await Contributor.findOne({ cpf })
 
@@ -14,24 +14,25 @@ class ContributorController {
         return res.status(409).json({ error: 'CPF já cadastrado. ' })
 
       const contributorAddress = (await requestCepAPI(cep)).data
-      console.log(Contributor)
+
       const contributor = await Contributor.create({
-        cpf: Number(cpf),
+        cpf,
         email,
-        telefone: Number(telefone),
+        telefone,
         nome,
 
-        cep: Number(cep),
+        cep,
         estado: contributorAddress.state,
         cidade: contributorAddress.city,
         bairro: contributorAddress.district,
-        rua: contributorAddress.address,
         logradouro: contributorAddress.address,
 
-        numeroDaCasa: Number(numeroDaCasa),
+        numero,
       })
 
       const contributorResult = contributor.toObject()
+      delete contributorResult._id
+      delete contributorResult.__v
 
       return res.status(201).json(contributorResult)
     } catch (error) {
