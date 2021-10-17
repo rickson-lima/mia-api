@@ -11,19 +11,16 @@ const ContributorSchema = new Schema(
 
     status: String,
 
-    email: {
-      type: String,
-      unique: true,
-    },
+    email: { type: String, default: null },
 
-    telefone: String,
+    telefone: { type: String, default: null },
 
-    cep: String,
-    estado: String,
-    cidade: String,
-    bairro: String,
-    logradouro: String,
-    numero: String,
+    cep: { type: String, default: null },
+    estado: { type: String, default: null },
+    cidade: { type: String, default: null },
+    bairro: { type: String, default: null },
+    logradouro: { type: String, default: null },
+    numero: { type: String, default: null },
   },
   { timestamps: true }
 )
