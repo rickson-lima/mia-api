@@ -5,7 +5,9 @@ import authMiddleware from './app/middlewares/auth'
 
 const routes = express.Router()
 
-routes.post('/api/contributor', ContributorController.store)
+routes.post('/api/contributor', ContributorController.create)
+routes.put('/api/contributor', ContributorController.update)
+
 routes.post('/api/auth', SessionController.store)
 
 routes.use(authMiddleware)

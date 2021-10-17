@@ -1,46 +1,73 @@
 import Contributor from '../models/Contributor.schema'
-import requestCepAPI from '../services/CepAPI'
-import { existsOrError, checkObject } from '../validations/emptyFields'
+import isValidName from '../validations/isValidName'
+import isValidCpf from '../validations/isValidCpf'
+import calculateStatus from '../utils/calculateStatus'
 class ContributorController {
   // TODO: FAZER VALIDAÇÕES DE CPF, EMAIL, TELEFONE
 
-  async store(req, res, next) {
+  async create(req, res, next) {
     try {
-      const { cpf, email, telefone, nome, cep, numero } = req.body
+      const { cpf, nome } = req.body
 
-      existsOrError(cpf, 'CPF do contribuinte não informado.')
+      isValidName(nome, 'Ei, você precisar informar seu nome completo 🤷‍♀️')
+
+      isValidCpf(cpf, 'Por favor, informa um CPF válido aí, vai 🙄')
       const isContributorRegistered = await Contributor.findOne({ cpf })
 
       if (isContributorRegistered)
-        return res.status(409).json({ error: 'CPF já cadastrado. ' })
+        return res.status(409).json({
+          message:
+            'Ops... Parece que este CPF já foi cadastrado por outra pessoa 😮',
+        })
 
-      existsOrError(email, 'Email do contribuinte não informado.')
-      existsOrError(telefone, 'Telefone do contribuinte não informado.')
-      existsOrError(nome, 'Nome do contribuinte não informado.')
-      existsOrError(cep, 'CEP do contribuinte não informado.')
-
-      const contributorAddress = (await requestCepAPI(cep)).data
-
-      const contributor = await Contributor.create({
+      await Contributor.create({
         cpf,
-        email,
-        telefone,
-        nome,
-
-        cep,
-        estado: contributorAddress.state,
-        cidade: contributorAddress.city,
-        bairro: contributorAddress.district,
-        logradouro: contributorAddress.address,
-
-        numero,
+        nome: nome.toUpperCase(),
       })
 
-      const contributorResult = contributor.toObject()
-      delete contributorResult._id
-      delete contributorResult.__v
+      return res
+        .status(201)
+        .json({ message: `Tudo certo, ${nome}. Agora podemos prosseguir 🥳` })
+    } catch (error) {
+      next(error)
+    }
+  }
 
-      return res.status(201).json(contributorResult)
+  async update(req, res, next) {
+    try {
+      const { cpf, email, telefone } = req.body
+
+      if (!cpf)
+        return res
+          .status(400)
+          .json({ message: 'Ei, você precisa informar seu CPF 🙄' })
+
+      const contributor = await Contributor.findOne({ cpf })
+      if (!contributor)
+        res
+          .status(404)
+          .json({ error: 'Ops... Parece que esse CPF não está cadastrado 🥱' })
+
+      contributor.email = email || contributor.email
+      contributor.telefone = telefone || contributor.telefone
+
+      contributor.status = calculateStatus(contributor)
+
+      // add cep
+
+      contributor.save()
+
+      const { createdAt, updatedAt } = contributor
+
+      return res.status(201).json({
+        nome: contributor.nome,
+        cpf: contributor.cpf,
+        status: contributor.status,
+        email: contributor.email,
+        telefone: contributor.telefone,
+        createdAt,
+        updatedAt,
+      })
     } catch (error) {
       next(error)
     }

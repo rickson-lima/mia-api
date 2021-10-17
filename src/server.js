@@ -30,7 +30,7 @@ server.use((req, res, next) => {
 // catch all
 server.use((error, req, res, next) => {
   res.status(error.status || 500)
-  res.json({ error: error.message })
+  res.json({ message: error.message })
 })
 
 server.listen(port, () => {

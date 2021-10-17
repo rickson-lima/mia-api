@@ -1,9 +1,10 @@
 import RequestError from './RequestError'
 
 export default function isValidCpf(cpf, msg) {
+  if (cpf == '' || !cpf) throw new RequestError(msg)
+
   cpf = cpf.replace(/[^\d]+/g, '')
 
-  if (cpf == '' || !cpf) throw new RequestError(msg)
   // Elimina CPFs invalidos conhecidos
 
   if (

@@ -2,14 +2,14 @@ import { model, Schema } from 'mongoose'
 
 const ContributorSchema = new Schema(
   {
-    nome: { type: String, required: true },
     cpf: {
       type: String,
       required: true,
       unique: true,
     },
+    nome: { type: String, required: true },
 
-    status: { type: String, default: null },
+    status: { type: String, default: '0%' },
 
     email: { type: String, default: null },
 
