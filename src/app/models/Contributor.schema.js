@@ -9,7 +9,7 @@ const ContributorSchema = new Schema(
       unique: true,
     },
 
-    status: String,
+    status: { type: String, default: null },
 
     email: { type: String, default: null },
 
