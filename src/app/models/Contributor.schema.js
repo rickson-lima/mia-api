@@ -2,7 +2,7 @@ import { model, Schema } from 'mongoose'
 
 const ContributorSchema = new Schema(
   {
-    nome: { String, required: true },
+    nome: { type: String, required: true },
     cpf: {
       type: String,
       required: true,
