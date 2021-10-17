@@ -7,6 +7,8 @@ const ContributorSchema = new Schema(
       required: true,
       unique: true,
     },
+    nome: String,
+    status: String,
     email: {
       type: String,
       unique: true,
@@ -16,16 +18,12 @@ const ContributorSchema = new Schema(
       type: String,
       required: true,
     },
-    nome: String,
-
     cep: String,
     estado: String,
     cidade: String,
     bairro: String,
     logradouro: String,
     numero: String,
-
-    statusDoCadastro: String,
   },
   { timestamps: true }
 )
