@@ -1,13 +1,26 @@
+// (qtdCamposPreenchidos / totalCampos) * 100
+// Math.floor(resultado)
+
 export default function calculateStatus(obj) {
   delete obj.$op
+  delete obj._id
+  delete obj.__v
+  delete obj.updatedAt
+  delete obj.createdAt
+  delete obj.status
 
-  let count = 0
+  let amount = 0
+  let total = 0
 
   for (const key in obj) {
-    if (obj[key] === null) {
-      count = count + 1
+    total = total + 1
+
+    if (obj[key]) {
+      amount = amount + 1
     }
   }
 
-  return count
+  let status = Math.floor((amount / total) * 100)
+
+  return status
 }
