@@ -4,12 +4,11 @@ const ContributorSchema = new Schema(
   {
     cpf: {
       type: String,
-      required: true,
-      unique: true,
+      default: null,
     },
     nome: { type: String, required: true },
 
-    status: { type: String, default: '0%' },
+    status: { type: String, default: null },
 
     email: { type: String, default: null },
 
