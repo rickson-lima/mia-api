@@ -6,7 +6,6 @@ export default function isValidCpf(cpf, msg) {
   cpf = cpf.replace(/[^\d]+/g, '')
 
   // Elimina CPFs invalidos conhecidos
-
   if (
     cpf.length != 11 ||
     cpf == '00000000000' ||
@@ -36,5 +35,11 @@ export default function isValidCpf(cpf, msg) {
   if (rev == 10 || rev == 11) rev = 0
   if (rev != parseInt(cpf.charAt(10))) throw new RequestError(msg)
 
-  return cpf
+  //realizar a formatação...
+  const formattedCpf = cpf.replace(
+    /(\d{3})(\d{3})(\d{3})(\d{2})/,
+    '$1.$2.$3-$4'
+  )
+
+  return formattedCpf
 }
