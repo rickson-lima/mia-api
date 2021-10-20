@@ -143,7 +143,7 @@ class ContributorController {
 
       res.status(200).json({
         message:
-          'Telefone ✅ Estamos quase finalizando, mas antes me fala qual é o CEP da sua casa 🏠',
+          'Telefone ✅ Estamos quase finalizando, mas antes me fala qual é o CEP da sua casa 📍',
       })
     } catch (error) {
       next(error)
@@ -179,6 +179,42 @@ class ContributorController {
       contributor.cidade = address.city
       contributor.bairro = address.district
       contributor.logradouro = address.address
+
+      const contributorObj = contributor.toObject()
+      const status = calculateStatus(contributorObj)
+
+      contributor.status = status + '%'
+
+      contributor.save()
+
+      res.status(200).json({
+        message: 'E agora o número o da sua casa 🏠',
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async storeNumero(req, res, next) {
+    try {
+      const { cpf, numero } = req.body
+
+      isValidCpf(cpf, 'Por favor, informe um CPF válido 😅')
+
+      const contributor = await Contributor.findOne({ cpf })
+
+      if (!contributor)
+        return res.status(404).json({
+          message:
+            'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
+        })
+
+      if (!Number(numero))
+        return res.status(400).json({
+          message: 'Por favor, informe somente números 🔢',
+        })
+
+      contributor.numero = numero
 
       const contributorObj = contributor.toObject()
       const status = calculateStatus(contributorObj)
