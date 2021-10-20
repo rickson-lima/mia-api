@@ -5,7 +5,7 @@ async function requestCepAPI(cep) {
 
   const response = await axios.get(url)
 
-  return response
+  return response.data
 }
 
 export default requestCepAPI
