@@ -11,10 +11,13 @@ class ContributorController {
     try {
       const { nome } = req.body
 
-      isValidName(nome, 'Ei, você precisar informar seu nome completo 😉')
+      const contributorName = isValidName(
+        nome,
+        'Ei, você precisar informar seu nome completo 😉'
+      )
 
       const contributor = await Contributor.create({
-        nome: nome.toUpperCase(),
+        nome: contributorName,
       })
 
       const { _id } = contributor
