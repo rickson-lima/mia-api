@@ -12,8 +12,6 @@ routes.put('/api/contributor/telefone', ContributorController.storePhone)
 routes.put('/api/contributor/cep', ContributorController.storeCep)
 routes.put('/api/contributor/numero', ContributorController.storeNumero)
 
-// criar a rota do numero da casa do contribuinte
-
 routes.post('/api/auth', SessionController.store)
 
 routes.use(authMiddleware)

@@ -38,6 +38,7 @@ class ContributorController {
 
   async storeCpf(req, res, next) {
     try {
+      // criar um middleware de validacao do cpf
       const { cpf, _id } = req.body
 
       const formattedCpf = isValidCpf(
@@ -80,15 +81,19 @@ class ContributorController {
     try {
       const { cpf, email } = req.body
 
-      isValidCpf(cpf, 'Por favor, informe um CPF válido 😅')
+      const formattedCpf = isValidCpf(
+        cpf,
+        'Por favor, informe um CPF válido 😅'
+      )
+      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
 
-      const contributor = await Contributor.findOne({ cpf })
-
-      if (!contributor)
+      if (!isCpfRegistered)
         return res.status(404).json({
           message:
             'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
         })
+
+      const contributor = isCpfRegistered
 
       isValidEmail(
         email,
@@ -117,15 +122,19 @@ class ContributorController {
     try {
       const { cpf, telefone } = req.body
 
-      isValidCpf(cpf, 'Por favor, informe um CPF válido 😅')
+      const formattedCpf = isValidCpf(
+        cpf,
+        'Por favor, informe um CPF válido 😅'
+      )
+      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
 
-      const contributor = await Contributor.findOne({ cpf })
-
-      if (!contributor)
+      if (!isCpfRegistered)
         return res.status(404).json({
           message:
             'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
         })
+
+      const contributor = isCpfRegistered
 
       isValidPhone(
         telefone,
@@ -154,15 +163,19 @@ class ContributorController {
     try {
       const { cpf, cep } = req.body
 
-      isValidCpf(cpf, 'Por favor, informe um CPF válido 😅')
+      const formattedCpf = isValidCpf(
+        cpf,
+        'Por favor, informe um CPF válido 😅'
+      )
+      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
 
-      const contributor = await Contributor.findOne({ cpf })
-
-      if (!contributor)
+      if (!isCpfRegistered)
         return res.status(404).json({
           message:
             'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
         })
+
+      const contributor = isCpfRegistered
 
       const responseCepApi = await requestCepAPI(cep)
 
@@ -188,7 +201,7 @@ class ContributorController {
       contributor.save()
 
       res.status(200).json({
-        message: 'E agora o número o da sua casa 🏠',
+        message: 'E agora o número da sua casa 🏠',
       })
     } catch (error) {
       next(error)
@@ -199,15 +212,19 @@ class ContributorController {
     try {
       const { cpf, numero } = req.body
 
-      isValidCpf(cpf, 'Por favor, informe um CPF válido 😅')
+      const formattedCpf = isValidCpf(
+        cpf,
+        'Por favor, informe um CPF válido 😅'
+      )
+      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
 
-      const contributor = await Contributor.findOne({ cpf })
-
-      if (!contributor)
+      if (!isCpfRegistered)
         return res.status(404).json({
           message:
             'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
         })
+
+      const contributor = isCpfRegistered
 
       if (!Number(numero))
         return res.status(400).json({
