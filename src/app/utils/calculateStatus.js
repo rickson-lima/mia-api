@@ -1,26 +1,36 @@
-// (qtdCamposPreenchidos / totalCampos) * 100
-// Math.floor(resultado)
+export default function (obj) {
+  const removeKeys = ({
+    $op,
+    _id,
+    __v,
+    updatedAt,
+    createdAt,
+    status,
+    ...rest
+  }) => rest
 
-export default function calculateStatus(obj) {
-  delete obj.$op
-  delete obj._id
-  delete obj.__v
-  delete obj.updatedAt
-  delete obj.createdAt
-  delete obj.status
+  const address = obj.address
+  delete obj.address
 
-  let amount = 0
-  let total = 0
+  const newObj = removeKeys(obj)
 
-  for (const key in obj) {
-    total = total + 1
+  const contributor = { ...newObj, ...address }
 
-    if (obj[key]) {
-      amount = amount + 1
+  let totalIntents = 0
+  let filledIntents = 0
+
+  for (const key in contributor) {
+    totalIntents = totalIntents + 1
+
+    if (contributor[key]) {
+      filledIntents = filledIntents + 1
     }
   }
 
-  let status = Math.floor((amount / total) * 100)
+  let percentage = Math.floor((filledIntents / totalIntents) * 100)
+  percentage = percentage + '%'
 
-  return status
+  let lastIntent = filledIntents
+
+  return { percentage, lastIntent }
 }
