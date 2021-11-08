@@ -15,9 +15,6 @@ mongoose.connect(
   { useNewUrlParser: true, useUnifiedTopology: true }
 )
 
-import morgan from 'morgan'
-server.use(morgan('dev'))
-
 server.use(cors())
 server.use(express.json())
 
