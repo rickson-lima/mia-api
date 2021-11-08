@@ -155,6 +155,7 @@ class ContributorController {
         `Nome ✅ ${contributor.nome}`,
         `Data de nascimento 🗓  ${contributor.dataNasc}`,
         `Email 💌 ${contributor.email}`,
+        `Telefone 💌 ${contributor.telefone}`,
         `CEP 🏠 ${contributor.cep}`,
       ]
 
