@@ -14,5 +14,5 @@ export default function isValidName(name, msg) {
 
   const contributorName = formattedName.join(' ')
 
-  return contributorName.toUpperCase()
+  return contributorName
 }

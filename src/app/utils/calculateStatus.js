@@ -1,20 +1,10 @@
+import { Intents } from '../models/Intents.schema'
+import { removeObjKeys } from './removeObjKeys'
+
 export default function (obj) {
-  const removeKeys = ({
-    $op,
-    _id,
-    __v,
-    updatedAt,
-    createdAt,
-    status,
-    ...rest
-  }) => rest
+  const newObj = removeObjKeys(obj)
 
-  const address = obj.address
-  delete obj.address
-
-  const newObj = removeKeys(obj)
-
-  const contributor = { ...newObj, ...address }
+  const contributor = { ...newObj }
 
   let totalIntents = 0
   let filledIntents = 0
@@ -30,7 +20,8 @@ export default function (obj) {
   let percentage = Math.floor((filledIntents / totalIntents) * 100)
   percentage = percentage + '%'
 
-  let lastIntent = filledIntents
+  let currentIntent = Intents[filledIntents - 1]
+  let nextIntent = Intents[filledIntents]
 
-  return { percentage, lastIntent }
+  return { percentage, currentIntent, nextIntent }
 }

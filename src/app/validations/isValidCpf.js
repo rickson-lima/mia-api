@@ -35,11 +35,11 @@ export default function isValidCpf(cpf, msg) {
   if (rev == 10 || rev == 11) rev = 0
   if (rev != parseInt(cpf.charAt(10))) throw new RequestError(msg)
 
-  //realizar a formatação...
-  const formattedCpf = cpf.replace(
-    /(\d{3})(\d{3})(\d{3})(\d{2})/,
-    '$1.$2.$3-$4'
-  )
+  // //realizar a formatação...
+  // const formattedCpf = cpf.replace(
+  //   /(\d{3})(\d{3})(\d{3})(\d{2})/,
+  //   '$1.$2.$3-$4'
+  // )
 
-  return formattedCpf
+  return cpf
 }

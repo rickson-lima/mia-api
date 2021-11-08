@@ -1,253 +1,168 @@
 import Contributor from '../models/Contributor.schema'
-import isValidName from '../validations/isValidName'
-import isValidCpf from '../validations/isValidCpf'
-import isValidEmail from '../validations/isValidEmail'
-import isValidPhone from '../validations/isValidPhone'
+
 import calculateStatus from '../utils/calculateStatus'
-import requestCepAPI from '../services/CepAPI'
+import { Conversations } from '../models/Intents.schema'
+import isValidCpf from '../validations/isValidCpf'
 
 class ContributorController {
   async create(req, res, next) {
-    try {
-      const { nome } = req.body
+    const messages = Conversations.store.created
+    const { registeredCpf } = Conversations.errors
 
-      const contributorName = isValidName(
-        nome,
-        'Ei, você precisar informar seu nome completo 😉'
+    const CPF = req.body['cpf']
+    const DATA_NASC = req.body['data-nasc']
+
+    try {
+      const validatedCpf = isValidCpf(
+        CPF,
+        'Por favor, informe um CPF válido 😅'
       )
+
+      // criar uma funcao validadora para data
+
+      const isCpfRegistered = await Contributor.findOne({ cpf: validatedCpf })
+
+      if (isCpfRegistered) return res.status(409).json({ error: registeredCpf })
 
       const contributor = await Contributor.create({
-        nome: contributorName,
+        cpf: validatedCpf,
+        dataNasc: DATA_NASC,
       })
 
-      const { _id } = contributor
-
       const contributorObj = contributor.toObject()
+
       const status = calculateStatus(contributorObj)
-
-      const contributorResult = await Contributor.findById(_id)
-
-      contributorResult.status = status + '%'
-      contributorResult.save()
-
-      return res.status(201).json({
-        message: 'Muito bem. Agora informe seu CPF 🤗',
-        _id,
-      })
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async storeCpf(req, res, next) {
-    try {
-      // criar um middleware de validacao do cpf
-      const { cpf, _id } = req.body
-
-      const formattedCpf = isValidCpf(
-        cpf,
-        'Por favor, informe um CPF válido 😅'
-      )
-      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
-
-      if (isCpfRegistered)
-        return res.status(409).json({
-          message:
-            'Ops... Esse CPF já foi cadastrado 😣. Verifique se você errou algum dígito e informe novamente 🤭',
-        })
-
-      const contributor = await Contributor.findById(_id)
-
-      if (!contributor)
-        return res.status(404).json({
-          message:
-            'Ops... Parece que você está tentando alterar o cadastro de outra pessoa... 😬',
-        })
-
-      contributor.cpf = formattedCpf
-
-      const contributorObj = contributor.toObject()
-      const status = calculateStatus(contributorObj)
-
-      contributor.status = status + '%'
-
-      contributor.save()
-      return res.status(201).json({
-        message: 'CPF ✅ Agora me diz qual é o seu email 💌',
-      })
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async storeEmail(req, res, next) {
-    try {
-      const { cpf, email } = req.body
-
-      const formattedCpf = isValidCpf(
-        cpf,
-        'Por favor, informe um CPF válido 😅'
-      )
-      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
-
-      if (!isCpfRegistered)
-        return res.status(404).json({
-          message:
-            'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
-        })
-
-      const contributor = isCpfRegistered
-
-      isValidEmail(
-        email,
-        'Poxa... Você precisa informar um email válido como exemplo@email.com 🥺'
-      )
-
-      contributor.email = email
-
-      const contributorObj = contributor.toObject()
-      const status = calculateStatus(contributorObj)
-
-      contributor.status = status + '%'
+      contributor.status = status
 
       contributor.save()
 
-      res.status(200).json({
-        message:
-          'Email ✅ Agora preciso do seu número de celular 📱 Não esqueça do seu DDD e o dígito 9 na frente, hein 🙃',
-      })
-    } catch (error) {
-      next(error)
+      return res.status(201).json({ messages, status })
+    } catch (err) {
+      next(err)
     }
   }
 
-  async storePhone(req, res, next) {
+  async storeNewData(func, req, res, next) {
+    const { intent, data } = req.body
+
+    const CPF = req.headers['cpf']
+    const DATA_NASC = req.headers['data-nasc']
+
+    const messages = Conversations.store[intent]
+
+    const { notRegisteredCpf } = Conversations.errors
+    const errorMessages = Conversations.errors[intent]
+
     try {
-      const { cpf, telefone } = req.body
-
-      const formattedCpf = isValidCpf(
-        cpf,
-        'Por favor, informe um CPF válido 😅'
-      )
-      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
-
-      if (!isCpfRegistered)
-        return res.status(404).json({
-          message:
-            'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
-        })
-
-      const contributor = isCpfRegistered
-
-      isValidPhone(
-        telefone,
-        'Poxa, parece que seu número de telefone está errado 😥 Verifica e informa de novo, por favor 🥺'
-      )
-
-      contributor.telefone = telefone
-
-      const contributorObj = contributor.toObject()
-      const status = calculateStatus(contributorObj)
-
-      contributor.status = status + '%'
-
-      contributor.save()
-
-      res.status(200).json({
-        message:
-          'Telefone ✅ Estamos quase finalizando, mas antes me fala qual é o CEP da sua casa 📍',
+      const contributor = await Contributor.findOne({
+        cpf: CPF,
+        dataNasc: DATA_NASC,
       })
-    } catch (error) {
-      next(error)
-    }
-  }
 
-  async storeCep(req, res, next) {
-    try {
-      const { cpf, cep } = req.body
+      if (!contributor) return res.status(404).json({ error: notRegisteredCpf })
 
-      const formattedCpf = isValidCpf(
-        cpf,
-        'Por favor, informe um CPF válido 😅'
-      )
-      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
+      if (intent === 'cep') {
+        const address = await func(data)
 
-      if (!isCpfRegistered)
-        return res.status(404).json({
-          message:
-            'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
-        })
+        if (address.status !== 200)
+          return res.status(400).json({ message: errorMessages })
 
-      const contributor = isCpfRegistered
-
-      const responseCepApi = await requestCepAPI(cep)
-
-      if (responseCepApi.status !== 200) {
-        return res.status(responseCepApi.status).json({
-          message: 'Ops... O CEP que você informou não é válido 😬',
-        })
+        contributor.cep = data
+        contributor.uf = address.state
+        contributor.cidade = address.city
+        contributor.bairro = address.district
+        contributor.logradouro = address.address
+      } else {
+        const validatedData = func(data, errorMessages)
+        contributor[intent] = validatedData
       }
 
-      const address = responseCepApi
-
-      contributor.cep = cep
-      contributor.estado = address.state
-      contributor.cidade = address.city
-      contributor.bairro = address.district
-      contributor.logradouro = address.address
-
-      const contributorObj = contributor.toObject()
-      const status = calculateStatus(contributorObj)
-
-      contributor.status = status + '%'
+      const status = calculateStatus(contributor.toObject())
+      contributor.status = status
 
       contributor.save()
 
-      res.status(200).json({
-        message: 'E agora o número da sua casa 🏠',
+      return res.status(201).json({ messages, status })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async updateData(func, req, res, next) {
+    const { intent, data } = req.body
+
+    const CPF = req.headers['cpf']
+    const DATA_NASC = req.headers['data-nasc']
+
+    const { notRegisteredCpf } = Conversations.errors
+    const errorMessages = Conversations.errors[intent]
+
+    try {
+      const contributor = await Contributor.findOne({
+        cpf: CPF,
+        dataNasc: DATA_NASC,
+      })
+
+      if (!contributor)
+        return res.status(404).json({ message: notRegisteredCpf })
+
+      if (intent === 'cep') {
+        const address = await func(data)
+
+        if (address.status !== 200)
+          return res.status(400).json({ message: errorMessages })
+
+        contributor.cep = data
+        contributor.uf = address.state
+        contributor.cidade = address.city
+        contributor.bairro = address.district
+        contributor.logradouro = address.address
+      } else {
+        const validatedData = func(data, errorMessages)
+        contributor[intent] = validatedData
+      }
+
+      contributor.save()
+
+      return res.json({
+        message: `Atualizei seu ${intent}, ${
+          contributor.nome.split(' ')[0]
+        } 🤗`,
       })
     } catch (error) {
       next(error)
     }
   }
 
-  async storeNumero(req, res, next) {
-    try {
-      const { cpf, numero } = req.body
+  async indexOne(req, res, next) {
+    const { incorrectData, notRegisteredCpf } = Conversations.errors
 
-      const formattedCpf = isValidCpf(
-        cpf,
-        'Por favor, informe um CPF válido 😅'
-      )
-      const isCpfRegistered = await Contributor.findOne({ cpf: formattedCpf })
+    const CPF = req.headers['cpf']
+    const DATA_NASC = req.headers['data-nasc']
+
+    try {
+      const isCpfRegistered = await Contributor.findOne({ cpf: CPF })
 
       if (!isCpfRegistered)
-        return res.status(404).json({
-          message:
-            'Hmmm... Parece que esse CPF não está cadastrado no nosso sistema 😶',
-        })
+        return res.status(404).json({ message: notRegisteredCpf })
 
       const contributor = isCpfRegistered
+      if (contributor.dataNasc !== DATA_NASC)
+        return res.status(409).json({ message: incorrectData })
 
-      if (!Number(numero))
-        return res.status(400).json({
-          message: 'Por favor, informe somente números 🔢',
-        })
+      const message = [
+        `CPF ✅ ${contributor.cpf}`,
+        `Nome ✅ ${contributor.nome}`,
+        `Data de nascimento 🗓  ${contributor.dataNasc}`,
+        `Email 💌 ${contributor.email}`,
+        `CEP 🏠 ${contributor.cep}`,
+      ]
 
-      contributor.numero = numero
+      const firstName = contributor.nome.split(' ')[0]
 
-      const contributorObj = contributor.toObject()
-      const status = calculateStatus(contributorObj)
-
-      contributor.status = status + '%'
-
-      contributor.save()
-
-      res.status(200).json({
-        message: 'Parabéns!!! Seu cadastro foi concluído 🥳🥳',
-      })
-    } catch (error) {
-      next(error)
+      return res.json({ message, firstName })
+    } catch (err) {
+      next(err)
     }
   }
 
